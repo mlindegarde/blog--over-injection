@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StructureMap" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FullBoar.Examples.OverInjection.Domain\FullBoar.Examples.OverInjection.Domain.csproj" />
+    <ProjectReference Include="..\FullBoar.Examples.OverInjection.Infrastructure\FullBoar.Examples.OverInjection.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
