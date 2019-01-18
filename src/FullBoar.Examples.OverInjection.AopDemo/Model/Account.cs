@@ -1,4 +1,4 @@
-﻿namespace FullBoar.Examples.OverInjection.Domain.Model
+﻿namespace FullBoar.Examples.OverInjection.AopDemo.Model
 {
     public class Account
     {

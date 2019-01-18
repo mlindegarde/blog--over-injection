@@ -1,12 +1,9 @@
 ﻿using System;
-using FullBoar.Examples.OverInjection.AopDemo.Interceptors;
-using FullBoar.Examples.OverInjection.AopDemo.Model;
-using FullBoar.Examples.OverInjection.AopDemo.Services;
+using FullBoar.Examples.OverInjection.BaseDemo.Model;
 using Serilog;
 using StructureMap;
-using StructureMap.DynamicInterception;
 
-namespace FullBoar.Examples.OverInjection.AopDemo
+namespace FullBoar.Examples.OverInjection.BaseDemo
 {
     class Program
     {
@@ -16,7 +13,7 @@ namespace FullBoar.Examples.OverInjection.AopDemo
 
         private void Init()
         {
-            _logger =
+            _logger = 
                 new LoggerConfiguration()
                     .WriteTo.Console()
                     .MinimumLevel.Verbose()
@@ -37,35 +34,19 @@ namespace FullBoar.Examples.OverInjection.AopDemo
                     config
                         .For<ILogger>()
                         .Use(_logger);
-
-                    config
-                        .For<IAccountService>()
-                        .InterceptWith(
-                            new DynamicProxyInterceptor<IAccountService>(
-                                new IInterceptionBehavior[]
-                                {
-                                    new ExceptionLoggingInterceptor(_logger)
-                                }));
                 });
         }
 
         private void RunOverdraft()
         {
             _logger.Information("Starting Overdraft Example...");
-            IAccountService accountSvc = _container.GetInstance<IAccountService>();
 
-            Account account = new Account();
+            Account account = _container.GetInstance<Account>();
 
-            accountSvc.Deposit(account, 100);
-            accountSvc.Withdraw(account, 50);
+            account.Process(new Deposit(100));
+            account.Process(new Withdrawal(100));
+            account.Process(new Check(1, 75));
 
-            accountSvc.ProcessCheck(
-                account,
-                new Check
-                {
-                    Number = 1,
-                    Amount = 75
-                });
             _logger.Information($"Done.{Environment.NewLine}");
         }
 
@@ -75,11 +56,7 @@ namespace FullBoar.Examples.OverInjection.AopDemo
 
             try
             {
-                IAccountService accountSvc = _container.GetInstance<IAccountService>();
-
-                Account account = new Account();
-
-                accountSvc.Deposit(account, -100);
+                _container.GetInstance<Account>().Process(new Deposit(-100));
             }
             finally
             {
@@ -97,7 +74,7 @@ namespace FullBoar.Examples.OverInjection.AopDemo
                 program.RunOverdraft();
                 program.RunException();
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Console.WriteLine($"Unhandled exception: {ex.Message}");
             }

@@ -1,8 +1,8 @@
 ﻿using System;
-using FullBoar.Examples.OverInjection.Domain.Model;
+using FullBoar.Examples.OverInjection.AopDemo.Model;
 using Serilog;
 
-namespace FullBoar.Examples.OverInjection.Domain.Services
+namespace FullBoar.Examples.OverInjection.AopDemo.Services
 {
     public class AccountService : IAccountService
     {
@@ -30,7 +30,7 @@ namespace FullBoar.Examples.OverInjection.Domain.Services
         #region IAccountService Implementation
         public void Deposit(Account account, int amount)
         {
-            if(amount <= 0)
+            if (amount <= 0)
             {
                 _logger.Error("Invalid deposit amount {Amount}", amount);
                 throw new ArgumentOutOfRangeException(nameof(amount), amount, "Invalid deposit amount");
@@ -52,10 +52,10 @@ namespace FullBoar.Examples.OverInjection.Domain.Services
 
         public void ProcessCheck(Account account, Check check)
         {
-            if(account == null)
+            if (account == null)
                 throw new ArgumentNullException(nameof(Account), "You must provide an account");
 
-            if(!_checkValidatorSvc.IsValid(check))
+            if (!_checkValidatorSvc.IsValid(check))
             {
                 _notificationSvc.SendNotification($"Invalid check: {check.Number}");
                 _logger.Information("Invalid check: {@Check}", check);
@@ -64,7 +64,7 @@ namespace FullBoar.Examples.OverInjection.Domain.Services
 
             account.Balance -= check.Amount;
 
-            if(account.Balance < 0)
+            if (account.Balance < 0)
             {
                 _notificationSvc.SendNotification("Account over withdrawn");
                 _logger.Information("Account over withdrawn");

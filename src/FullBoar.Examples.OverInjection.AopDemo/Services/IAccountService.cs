@@ -1,6 +1,6 @@
-﻿using FullBoar.Examples.OverInjection.Domain.Model;
+﻿using FullBoar.Examples.OverInjection.AopDemo.Model;
 
-namespace FullBoar.Examples.OverInjection.Domain.Services
+namespace FullBoar.Examples.OverInjection.AopDemo.Services
 {
     public interface IAccountService
     {

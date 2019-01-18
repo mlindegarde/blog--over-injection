@@ -1,6 +1,6 @@
-﻿using FullBoar.Examples.OverInjection.Domain.Model;
+﻿using FullBoar.Examples.OverInjection.BaseDemo.Model;
 
-namespace FullBoar.Examples.OverInjection.Domain.Services
+namespace FullBoar.Examples.OverInjection.BaseDemo.Services
 {
     public class OverdraftService : IOverdraftService
     {
@@ -11,7 +11,7 @@ namespace FullBoar.Examples.OverInjection.Domain.Services
         #region IOverdraftService Implementation
         public void ApplyPenalty(Account account)
         {
-            account.Balance -= OverdraftFee;
+            account.Process(new Withdrawal(OverdraftFee));
         }
         #endregion
     }

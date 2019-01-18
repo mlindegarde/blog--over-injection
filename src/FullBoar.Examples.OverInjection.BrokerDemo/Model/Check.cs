@@ -1,4 +1,4 @@
-﻿namespace FullBoar.Examples.OverInjection.Domain.Model
+﻿namespace FullBoar.Examples.OverInjection.BrokerDemo.Model
 {
     public class Check
     {

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -9,12 +9,6 @@
     <PackageReference Include="serilog" Version="2.8.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.2-dev-00788" />
     <PackageReference Include="StructureMap" Version="4.7.0" />
-    <PackageReference Include="StructureMap.DynamicInterception" Version="1.1.1" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
   </ItemGroup>
 
 </Project>

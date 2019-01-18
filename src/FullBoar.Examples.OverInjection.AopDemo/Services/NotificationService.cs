@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace FullBoar.Examples.OverInjection.Domain.Services
+﻿namespace FullBoar.Examples.OverInjection.AopDemo.Services
 {
     public class NotificationService : INotificationService
     {
         #region INotificationService Implementation
         public void SendNotification(string notification)
         {
-            Console.WriteLine(notification);
+            // Do something interesting here.
         }
         #endregion
     }

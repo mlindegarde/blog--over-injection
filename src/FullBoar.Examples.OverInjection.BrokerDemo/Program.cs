@@ -1,12 +1,11 @@
 ﻿using System;
-using FullBoar.Examples.OverInjection.AopDemo.Interceptors;
-using FullBoar.Examples.OverInjection.AopDemo.Model;
-using FullBoar.Examples.OverInjection.AopDemo.Services;
+using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Broker;
+using FullBoar.Examples.OverInjection.BrokerDemo.Model;
+using FullBoar.Examples.OverInjection.BrokerDemo.Services;
 using Serilog;
 using StructureMap;
-using StructureMap.DynamicInterception;
 
-namespace FullBoar.Examples.OverInjection.AopDemo
+namespace FullBoar.Examples.OverInjection.BrokerDemo
 {
     class Program
     {
@@ -34,19 +33,15 @@ namespace FullBoar.Examples.OverInjection.AopDemo
                             scanner.WithDefaultConventions();
                         });
 
-                    config
-                        .For<ILogger>()
-                        .Use(_logger);
+                    config.For<IMessageBroker>().Singleton();
+                    config.For<ILogger>().Use(_logger);
 
-                    config
-                        .For<IAccountService>()
-                        .InterceptWith(
-                            new DynamicProxyInterceptor<IAccountService>(
-                                new IInterceptionBehavior[]
-                                {
-                                    new ExceptionLoggingInterceptor(_logger)
-                                }));
+                    config.For<IOverdraftService>().Singleton();
+                    config.For<INotificationService>().Singleton();
                 });
+
+            _container.GetInstance<IOverdraftService>();
+            _container.GetInstance<INotificationService>();
         }
 
         private void RunOverdraft()
