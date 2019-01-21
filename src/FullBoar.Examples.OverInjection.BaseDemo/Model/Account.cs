@@ -4,7 +4,7 @@ using Serilog;
 
 namespace FullBoar.Examples.OverInjection.BaseDemo.Model
 {
-    public class Account
+    public class Account : IAccount
     {
         #region Member Variables
         private readonly bool _allowOverdrafts;
@@ -43,7 +43,7 @@ namespace FullBoar.Examples.OverInjection.BaseDemo.Model
                 if (!deposit.IsValid)
                 {
                     _logger.Error("Invalid transaction {@Transaction}", deposit);
-                    throw new ArgumentOutOfRangeException(nameof(deposit), deposit, "Invalid transaction");
+                    throw new ArgumentException("Invalid transaction");
                 }
 
                 _balance += deposit.Amount;
@@ -65,9 +65,9 @@ namespace FullBoar.Examples.OverInjection.BaseDemo.Model
                     throw new ArgumentOutOfRangeException(nameof(withdrawal), withdrawal, "Invalid transaction");
                 }
 
-                if (HasSufficientFunds(withdrawal.Amount))
+                if (!HasSufficientFunds(withdrawal.Amount))
                 {
-                    _logger.Error("You cannot withdraw more than is in the account");
+                    _notificationSvc.SendNotification("You cannot withdraw more than is in the account");
                     return;
                 }
 
@@ -93,19 +93,16 @@ namespace FullBoar.Examples.OverInjection.BaseDemo.Model
                 if(!(HasSufficientFunds(check.Amount) || _allowOverdrafts))
                 {
                     _notificationSvc.SendNotification("Check bounced, insufficient founds an overdrafts are not allowed");
-                    _logger.Information("Check bounced: insufficient founds");
                     _bouncedCheckSvc.ApplyPenalty(this);
 
                     return;
                 }
 
-                if(HasSufficientFunds(check.Amount) || _allowOverdrafts)
-                    _balance -= check.Amount;
+                _balance -= check.Amount;
 
                 if (_balance < 0)
                 {
                     _notificationSvc.SendNotification("Account over withdrawn");
-                    _logger.Information("Account over withdrawn");
                     _overdraftSvc.ApplyPenalty(this);
                 }
             }
@@ -114,6 +111,32 @@ namespace FullBoar.Examples.OverInjection.BaseDemo.Model
                 _logger.Error("The following exception is being logged: {Message}", ex.Message);
                 throw;
             }
+        }
+
+        public void Process(Fee fee)
+        {
+            try
+            {
+                if (!fee.IsValid)
+                {
+                    _logger.Error("Invalid transaction {@Transaction}", fee);
+                    throw new ArgumentException("Invalid transaction");
+                }
+
+                _balance -= fee.Amount;
+
+                _notificationSvc.SendNotification($"Fee assessed: {fee.Amount}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("The following exception is being logged: {Message}", ex.Message);
+                throw;
+            }
+        }
+
+        public int GetBalance()
+        {
+            return _balance;
         }
         #endregion
 

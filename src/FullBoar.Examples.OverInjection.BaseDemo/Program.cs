@@ -7,8 +7,7 @@ namespace FullBoar.Examples.OverInjection.BaseDemo
 {
     class Program
     {
-        private readonly IContainer _container = new Container();
-
+        private IContainer _container;
         private ILogger _logger;
 
         private void Init()
@@ -19,47 +18,39 @@ namespace FullBoar.Examples.OverInjection.BaseDemo
                     .MinimumLevel.Verbose()
                     .CreateLogger();
 
-            _container.Configure(
-                config =>
-                {
-                    config.Scan(
-                        scanner =>
-                        {
-                            scanner.TheCallingAssembly();
-                            scanner.AssembliesAndExecutablesFromApplicationBaseDirectory(
-                                assembly => assembly.FullName.StartsWith("FullBoar"));
-                            scanner.WithDefaultConventions();
-                        });
-
-                    config
-                        .For<ILogger>()
-                        .Use(_logger);
-                });
+            _container = new Container(new ProgramRegistry(_logger));
         }
 
         private void RunOverdraft()
         {
-            _logger.Information("Starting Overdraft Example...");
-
-            Account account = _container.GetInstance<Account>();
-
+            IAccount account = _container.GetInstance<IAccount>();
             account.Process(new Deposit(100));
-            account.Process(new Withdrawal(100));
+
+            _logger.Information("Starting Overdraft Example...");
+            _logger.Information($"Opening balance: {account.GetBalance()}");
+
+            account.Process(new Withdrawal(50));
             account.Process(new Check(1, 75));
 
-            _logger.Information($"Done.{Environment.NewLine}");
+            _logger.Information($"Closing balance: {account.GetBalance()}");
+            _logger.Information($"Done{Environment.NewLine}");
         }
 
         private void RunException()
         {
+            IAccount account = _container.GetInstance<IAccount>();
+            account.Process(new Deposit(100));
+
             _logger.Information("Starting Exception Example...");
+            _logger.Information($"Opening balance: {account.GetBalance()}");
 
             try
             {
-                _container.GetInstance<Account>().Process(new Deposit(-100));
+                account.Process(new Deposit(-100));
             }
             finally
             {
+                _logger.Information($"Closing balance: {account.GetBalance()}");
                 _logger.Information($"Done.{Environment.NewLine}");
             }
         }
@@ -68,6 +59,8 @@ namespace FullBoar.Examples.OverInjection.BaseDemo
         {
             try
             {
+                Console.WriteLine($"Base Demo {Environment.NewLine}");
+
                 Program program = new Program();
 
                 program.Init();

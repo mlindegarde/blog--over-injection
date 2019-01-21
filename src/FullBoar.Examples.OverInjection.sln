@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FullBoar.Examples.OverInjec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullBoar.Examples.OverInjection.BrokerDemo", "FullBoar.Examples.OverInjection.BrokerDemo\FullBoar.Examples.OverInjection.BrokerDemo.csproj", "{4845422C-E947-4FDF-B9EC-18BA35419C46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FullBoar.Examples.OverInjection.FinalDemo", "FullBoar.Examples.OverInjection.FinalDemo\FullBoar.Examples.OverInjection.FinalDemo.csproj", "{81A68361-001E-4379-8CA1-597FA8E8CB00}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{4845422C-E947-4FDF-B9EC-18BA35419C46}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4845422C-E947-4FDF-B9EC-18BA35419C46}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4845422C-E947-4FDF-B9EC-18BA35419C46}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81A68361-001E-4379-8CA1-597FA8E8CB00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81A68361-001E-4379-8CA1-597FA8E8CB00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81A68361-001E-4379-8CA1-597FA8E8CB00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81A68361-001E-4379-8CA1-597FA8E8CB00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,8 +2,8 @@
 
 namespace FullBoar.Examples.OverInjection.AopDemo.Services
 {
-    public interface ICheckValidatorService
+    public interface IBouncedCheckService
     {
-        bool IsValid(Check check);
+        void ApplyPenalty(Account account);
     }
 }

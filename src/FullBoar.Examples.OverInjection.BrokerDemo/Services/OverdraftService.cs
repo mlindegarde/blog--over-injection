@@ -1,38 +1,37 @@
-﻿using System;
-using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Broker;
+﻿using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Broker;
 using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Events;
 using FullBoar.Examples.OverInjection.BrokerDemo.Model;
 
 namespace FullBoar.Examples.OverInjection.BrokerDemo.Services
 {
-    public class OverdraftService : IOverdraftService
+    public class OverdraftService : IOverdraftService, ISubscriber
     {
         #region Constants
-        private const int OverdraftFee = 35;
+        private const int OverdraftFee = 25;
         #endregion
 
         #region Member Variables
-        private readonly Guid _overdraftSub;
+        private readonly IMessageBroker _broker;
         #endregion
 
         #region Constructor
         public OverdraftService(IMessageBroker broker)
         {
-            _overdraftSub = broker.Subscribe<AccountOverWithdrawn>(OnAccountOverWithdrawn);
+            _broker = broker;
         }
         #endregion
 
-        #region IOverdraftService Implementation
-        public void ApplyPenalty(Account account)
+        #region ISubscriber Implementation
+        public void Subscribe()
         {
-            account.Balance -= OverdraftFee;
+            _broker.Subscribe<AccountOverWithdrawn>(OnAccountOverWithdrawn);
         }
         #endregion
 
         #region Event Handlers
-        private void OnAccountOverWithdrawn(AccountOverWithdrawn evt)
+        public void OnAccountOverWithdrawn(AccountOverWithdrawn evt)
         {
-            ApplyPenalty(evt.Account);
+            evt.Account.Process(new Fee(OverdraftFee));
         }
         #endregion
     }

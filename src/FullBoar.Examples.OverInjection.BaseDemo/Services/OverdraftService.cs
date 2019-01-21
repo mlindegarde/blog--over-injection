@@ -5,13 +5,13 @@ namespace FullBoar.Examples.OverInjection.BaseDemo.Services
     public class OverdraftService : IOverdraftService
     {
         #region Constants
-        private const int OverdraftFee = 35;
+        private const int OverdraftFee = 25;
         #endregion
 
         #region IOverdraftService Implementation
         public void ApplyPenalty(Account account)
         {
-            account.Process(new Withdrawal(OverdraftFee));
+            account.Process(new Fee(OverdraftFee));
         }
         #endregion
     }

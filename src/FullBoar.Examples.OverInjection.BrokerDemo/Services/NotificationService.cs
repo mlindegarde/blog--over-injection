@@ -1,39 +1,60 @@
-﻿using System;
-using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Broker;
+﻿using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Broker;
 using FullBoar.Examples.OverInjection.BrokerDemo.Messaging.Events;
+using Serilog;
 
 namespace FullBoar.Examples.OverInjection.BrokerDemo.Services
 {
-    public class NotificationService : INotificationService
+    public class NotificationService : INotificationService, ISubscriber
     {
         #region Member Variables
-        private readonly Guid _overdraftSub;
+        private readonly ILogger _logger;
+        private readonly IMessageBroker _broker;
         #endregion
 
         #region Constructor
-        public NotificationService(IMessageBroker broker)
+        public NotificationService(IMessageBroker broker, ILogger logger)
         {
-            _overdraftSub = broker.Subscribe<AccountOverWithdrawn>(OnAccountOverWithdrawn);
+            _broker = broker;
+            _logger = logger.ForContext<NotificationService>();
         }
         #endregion
 
         #region INotificationService Implementation
         public void SendNotification(string notification)
         {
-            // Do something interesting here
+            _logger.Information($"{nameof(NotificationService)} - {notification}", nameof(NotificationService));
+        }
+        #endregion
+
+        #region ISubscriber Implementation
+        public void Subscribe()
+        {
+            _broker.Subscribe<WithdrawalDeclined>(OnWithdrawalDeclined);
+            _broker.Subscribe<CheckBounced>(OnCheckBounced);
+            _broker.Subscribe<AccountOverWithdrawn>(OnAccountOverWithdrawn);
+            _broker.Subscribe<FeeAssessed>(OnFeeAssessed);
         }
         #endregion
 
         #region Event Handlers
-        private void OnAccountOverWithdrawn(AccountOverWithdrawn evt)
+        public void OnWithdrawalDeclined(WithdrawalDeclined evt)
         {
-            SendNotification("Account over withdrawn");
-            //_logger.Information("Account over withdrawn");
+            SendNotification("You cannot withdraw more than is in the account");
         }
 
-        private void OnCheckFailedValidation(CheckFailedValidation evt)
+        public void OnCheckBounced(CheckBounced evt)
         {
-            //_logger.Information("Invalid check: {@Check}", evt.Check);
+            SendNotification("Check bounced, insufficient founds an overdrafts are not allowed");
+        }
+
+        public void OnAccountOverWithdrawn(AccountOverWithdrawn evt)
+        {
+            SendNotification("Account over withdrawn");
+        }
+
+        public void OnFeeAssessed(FeeAssessed evt)
+        {
+            SendNotification($"Fee assessed: {evt.Transaction.Amount}");
         }
         #endregion
     }

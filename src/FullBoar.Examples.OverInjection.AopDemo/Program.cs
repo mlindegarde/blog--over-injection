@@ -1,17 +1,13 @@
 ﻿using System;
-using FullBoar.Examples.OverInjection.AopDemo.Interceptors;
 using FullBoar.Examples.OverInjection.AopDemo.Model;
-using FullBoar.Examples.OverInjection.AopDemo.Services;
 using Serilog;
 using StructureMap;
-using StructureMap.DynamicInterception;
 
 namespace FullBoar.Examples.OverInjection.AopDemo
 {
     class Program
     {
-        private readonly IContainer _container = new Container();
-
+        private IContainer _container;
         private ILogger _logger;
 
         private void Init()
@@ -22,67 +18,39 @@ namespace FullBoar.Examples.OverInjection.AopDemo
                     .MinimumLevel.Verbose()
                     .CreateLogger();
 
-            _container.Configure(
-                config =>
-                {
-                    config.Scan(
-                        scanner =>
-                        {
-                            scanner.TheCallingAssembly();
-                            scanner.AssembliesAndExecutablesFromApplicationBaseDirectory(
-                                assembly => assembly.FullName.StartsWith("FullBoar"));
-                            scanner.WithDefaultConventions();
-                        });
-
-                    config
-                        .For<ILogger>()
-                        .Use(_logger);
-
-                    config
-                        .For<IAccountService>()
-                        .InterceptWith(
-                            new DynamicProxyInterceptor<IAccountService>(
-                                new IInterceptionBehavior[]
-                                {
-                                    new ExceptionLoggingInterceptor(_logger)
-                                }));
-                });
+            _container = new Container(new ProgramRegistry(_logger));
         }
 
         private void RunOverdraft()
         {
+            IAccount account = _container.GetInstance<IAccount>();
+            account.Process(new Deposit(100));
+
             _logger.Information("Starting Overdraft Example...");
-            IAccountService accountSvc = _container.GetInstance<IAccountService>();
+            _logger.Information($"Opening balance: {account.GetBalance()}");
 
-            Account account = new Account();
+            account.Process(new Withdrawal(50));
+            account.Process(new Check(1, 75));
 
-            accountSvc.Deposit(account, 100);
-            accountSvc.Withdraw(account, 50);
-
-            accountSvc.ProcessCheck(
-                account,
-                new Check
-                {
-                    Number = 1,
-                    Amount = 75
-                });
-            _logger.Information($"Done.{Environment.NewLine}");
+            _logger.Information($"Closing balance: {account.GetBalance()}");
+            _logger.Information($"Done{Environment.NewLine}");
         }
 
         private void RunException()
         {
+            IAccount account = _container.GetInstance<IAccount>();
+            account.Process(new Deposit(100));
+
             _logger.Information("Starting Exception Example...");
+            _logger.Information($"Opening balance: {account.GetBalance()}");
 
             try
             {
-                IAccountService accountSvc = _container.GetInstance<IAccountService>();
-
-                Account account = new Account();
-
-                accountSvc.Deposit(account, -100);
+                account.Process(new Deposit(-100));
             }
             finally
             {
+                _logger.Information($"Closing balance: {account.GetBalance()}");
                 _logger.Information($"Done.{Environment.NewLine}");
             }
         }
@@ -91,6 +59,8 @@ namespace FullBoar.Examples.OverInjection.AopDemo
         {
             try
             {
+                Console.WriteLine($"AOP Demo {Environment.NewLine}");
+
                 Program program = new Program();
 
                 program.Init();
