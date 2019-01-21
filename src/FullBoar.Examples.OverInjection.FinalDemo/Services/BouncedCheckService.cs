@@ -22,7 +22,7 @@ namespace FullBoar.Examples.OverInjection.FinalDemo.Services
         #endregion
 
         #region ISubscriber Implementation
-        public void Subscribe()
+        public void RegisterSubscriptions()
         {
             _broker.Subscribe<CheckBounced>(OnCheckBounced);
         }

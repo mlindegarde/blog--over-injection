@@ -26,7 +26,7 @@ namespace FullBoar.Examples.OverInjection.BrokerDemo
                 .GetAllInstances<ISubscriber>()
                 .ToList()
                 .ForEach(
-                    s => s.Subscribe());
+                    s => s.RegisterSubscriptions());
         }
 
         private void RunOverdraft()

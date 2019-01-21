@@ -2,19 +2,11 @@
 
 namespace FullBoar.Examples.OverInjection.FinalDemo.Messaging.Broker
 {
-    public interface IMessageBroker : IDisposable
+    public interface IMessageBroker
     {
-        #region Properties
-        bool IsDisposed { get; }
-        #endregion
-
         #region Methods
-        void Publish<T>(T message, Action<MessageBrokerError> onError = null);
-        void Publish(Object message, Type messageType, Action<MessageBrokerError> onError = null);
-        Guid Subscribe<T>(Action<T> action);
-        Guid Subscribe(Type type, Action<Object> action);
-        void UnSubscribe(Guid token);
-        bool IsSubscribed(Guid token);
+        void Publish<TMessage>(TMessage message);
+        Guid Subscribe<TMessage>(Action<TMessage> action);
         #endregion
     }
 }

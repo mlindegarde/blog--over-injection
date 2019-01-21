@@ -1,143 +1,37 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace FullBoar.Examples.OverInjection.FinalDemo.Messaging.Broker
 {
-    public sealed class MessageBroker : IMessageBroker
+    public class MessageBroker : IMessageBroker
     {
         #region Member Variables
-        private int _disposed;
-        #endregion
-
-        #region Properties
-        public bool IsDisposed => _disposed == 1;
+        private static readonly List<Subscription> Subscriptions = new List<Subscription>();
         #endregion
 
         #region IMessageBroker Implementation
-        public void Publish<T>(T message, Action<MessageBrokerError> onError = null)
+        public void Publish<TMessage>(TMessage message)
         {
-            var localSubscriptions = Subscriptions.GetTheLatestRevisionOfSubscriptions();
+            Subscriptions
+                .Where(s => s.Type.GetTypeInfo().IsAssignableFrom(typeof(TMessage)))
+                .ToList()
+                .ForEach(s => s.Handle(message));
+        }
 
-            var msgType = typeof(T);
-
-            // ReSharper disable once ForCanBeConvertedToForeach | Performance Critical
-            for (var idx = 0; idx < localSubscriptions.Length; idx++)
-            {
-                var subscription = localSubscriptions[idx];
-
-                if (!subscription.Type.GetTypeInfo().IsAssignableFrom(msgType)) { continue; }
-
-                try
+        public Guid Subscribe<TMessage>(Action<TMessage> action)
+        {
+            Subscription subscription =
+                new Subscription
                 {
-                    subscription.Handle(message);
-                }
-                catch(Exception e)
-                {
-                    Action<MessageBrokerError> copy = onError;
+                    Type = typeof(TMessage),
+                    Token = Guid.NewGuid(),
+                    Handler = action
+                };
 
-                    if(copy == null)
-                        throw;
-
-                    copy.Invoke(
-                        new MessageBrokerError
-                        {
-                            Exception = e,
-                            SubscriptionToken = subscription.Token
-                        });
-                }
-            }
-        }
-
-        public void Publish(Object message, Type messageType, Action<MessageBrokerError> onError = null)
-        {
-            var localSubscriptions = Subscriptions.GetTheLatestRevisionOfSubscriptions();
-
-            // ReSharper disable once ForCanBeConvertedToForeach | Performance Critical
-            for (var idx = 0; idx < localSubscriptions.Length; idx++)
-            {
-                var subscription = localSubscriptions[idx];
-
-                if (!subscription.Type.GetTypeInfo().IsAssignableFrom(messageType)) { continue; }
-
-                try
-                {
-                    subscription.Handle(message);
-                }
-                catch(Exception e)
-                {
-                    Action<MessageBrokerError> copy = onError;
-
-                    if(copy == null)
-                        throw;
-
-                    copy.Invoke(
-                        new MessageBrokerError
-                        {
-                            Exception = e,
-                            SubscriptionToken = subscription.Token
-                        });
-                }
-            }
-        }
-
-        public Guid Subscribe<T>(Action<T> action)
-        {
-            return Subscribe(action, TimeSpan.Zero);
-        }
-
-        public Guid Subscribe<T>(Action<T> action, TimeSpan throttleBy)
-        {
-            EnsureNotNull(action);
-            EnsureNotDisposed();
-
-            return Subscriptions.Register(throttleBy, action);
-        }
-
-        public Guid Subscribe(Type type, Action<Object> action)
-        {
-            return Subscribe(type, action, TimeSpan.Zero);
-        }
-
-        public Guid Subscribe(Type type, Action<Object> action, TimeSpan throttleBy)
-        {
-            EnsureNotNull(action);
-            EnsureNotDisposed();
-
-            return Subscriptions.Register(type, throttleBy, action);
-        }
-
-        public void UnSubscribe(Guid token)
-        {
-            EnsureNotDisposed();
-            Subscriptions.UnRegister(token);
-        }
-
-        public bool IsSubscribed(Guid token)
-        {
-            EnsureNotDisposed();
-            return Subscriptions.IsRegistered(token);
-        }
-        #endregion
-
-        #region Utility Methods
-        public void Dispose()
-        {
-            Interlocked.Increment(ref _disposed);
-            Subscriptions.Dispose();
-        }
-
-        [DebuggerStepThrough]
-        private void EnsureNotDisposed()
-        {
-            if (_disposed == 1) { throw new ObjectDisposedException(GetType().Name); }
-        }
-
-        [DebuggerStepThrough]
-        private void EnsureNotNull(object obj)
-        {
-            if (obj == null) { throw new NullReferenceException(nameof(obj)); }
+            Subscriptions.Add(subscription);
+            return subscription.Token;
         }
         #endregion
     }

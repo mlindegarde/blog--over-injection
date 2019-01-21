@@ -2,6 +2,8 @@
 {
     public interface ISubscriber
     {
-        void Subscribe();
+        #region Methods
+        void RegisterSubscriptions();
+        #endregion
     }
 }
